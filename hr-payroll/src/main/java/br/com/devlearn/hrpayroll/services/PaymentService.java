@@ -2,23 +2,22 @@ package br.com.devlearn.hrpayroll.services;
 
 import br.com.devlearn.hrpayroll.entities.Payment;
 import br.com.devlearn.hrpayroll.entities.Worker;
+import br.com.devlearn.hrpayroll.feignclients.WorkerFeignClient;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class PaymentService {
     @Autowired
-    private RestTemplate restTemplate;
-
-    @Value("${hr-worker.host}")
-    String workerHost;
+    private WorkerFeignClient workerFeignClient;
 
     public List<Payment> getPaymentsByDays(Integer days) {
-        List<Worker> workers = Arrays.stream(restTemplate.getForObject(workerHost + "/workers", Worker[].class)).toList();
+        List<Worker> workers = workerFeignClient.findAll().getBody();
 
         List<Payment> payments = new ArrayList<>();
 
@@ -33,7 +32,7 @@ public class PaymentService {
         Map<String, String> uriVariables = new HashMap<>();
         uriVariables.put("id", workerId.toString());
 
-        Worker worker = restTemplate.getForObject(workerHost+"/workers/{id}", Worker.class, uriVariables);
+        Worker worker = workerFeignClient.findById(workerId).getBody();
 
         return new Payment(worker.getName(), days, worker.getDailyIncome());
     }
