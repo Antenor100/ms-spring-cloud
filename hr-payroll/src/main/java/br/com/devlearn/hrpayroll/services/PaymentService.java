@@ -29,9 +29,6 @@ public class PaymentService {
     }
 
     public Payment getPaymentByWorkerIdAndDays(Long workerId, Integer days) {
-        Map<String, String> uriVariables = new HashMap<>();
-        uriVariables.put("id", workerId.toString());
-
         Worker worker = workerFeignClient.findById(workerId).getBody();
 
         return new Payment(worker.getName(), days, worker.getDailyIncome());
